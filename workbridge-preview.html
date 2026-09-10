@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WorkBridge — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #1E2A32; --canvas: #F5F6F3; --panel: #FFFFFF; --line: #D8DDD6;
+    --accent: #2B6CA3; --accentDark: #1F4E78; --warn: #B4552F; --muted: #5B6670;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'IBM Plex Sans',system-ui,sans-serif; background:var(--canvas); color:var(--ink); }
+  h1,h2,h3 { font-family:'Space Grotesk',system-ui,sans-serif; letter-spacing:-0.01em; margin:0; }
+  h1 { font-size:20px; font-weight:600; }
+  a, button, input, select { font-family: inherit; }
+  .row { display:flex; align-items:center; }
+  .between { justify-content:space-between; }
+  .gap-sm { gap:8px; } .gap-md { gap:12px; } .gap-lg { gap:16px; }
+  .muted { color: var(--muted); }
+  .small { font-size:13px; }
+  .tiny { font-size:12px; }
+  .mt-1 { margin-top:4px; } .mt-2 { margin-top:8px; } .mt-3 { margin-top:12px; }
+  .mt-4 { margin-top:16px; } .mt-6 { margin-top:24px; }
+
+  /* login split screen */
+  .login-grid { display:grid; grid-template-columns: 1fr; min-height:100vh; }
+  @media (min-width:800px) { .login-grid { grid-template-columns: 1fr 1fr; } }
+  .brand-panel { display:none; position:relative; overflow:hidden; background:var(--ink); color:#fff; padding:40px; flex-direction:column; justify-content:space-between; }
+  @media (min-width:800px) { .brand-panel { display:flex; } }
+  .brand-tag { max-width:360px; font-size:24px; line-height:1.3; }
+  .brand-sub { max-width:360px; font-size:14px; color:rgba(255,255,255,0.6); margin-top:12px; }
+  .form-panel { display:flex; align-items:center; justify-content:center; padding:48px 24px; }
+  .form-box { width:100%; max-width:360px; }
+  .field-label { display:block; font-size:14px; font-weight:500; margin-top:16px; }
+  .field { margin-top:4px; width:100%; border:1px solid var(--line); background:var(--panel); border-radius:6px; padding:8px 12px; font-size:14px; }
+  .btn { border-radius:6px; padding:8px 16px; font-size:14px; font-weight:500; cursor:pointer; border:1px solid var(--line); background:var(--panel); color:var(--ink); transition:.15s; }
+  .btn:hover { border-color:var(--ink); }
+  .btn-primary { background:var(--accent); border-color:var(--accent); color:#fff; width:100%; }
+  .btn-primary:hover { background:var(--accentDark); border-color:var(--accentDark); }
+  .btn-sm { padding:4px 10px; font-size:12px; }
+  .btn-warn { color:var(--warn); }
+  .btn-warn:hover { border-color:var(--warn); }
+
+  /* app shell */
+  .header { border-bottom:1px solid var(--line); background:var(--panel); }
+  .header-inner { max-width:1100px; margin:0 auto; padding:16px 24px; }
+  .shell { max-width:1100px; margin:0 auto; display:flex; }
+  .sidebar { width:200px; flex-shrink:0; border-right:1px solid var(--line); padding:24px 16px 24px 0; }
+  .sidebar ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+  .navlink { display:block; width:100%; text-align:left; border:none; background:none; border-radius:6px; padding:8px 12px; font-size:14px; cursor:pointer; color:var(--ink); }
+  .navlink:hover { background: rgba(216,221,214,0.5); }
+  .navlink.active { background:var(--accent); color:#fff; }
+  main.content { flex:1; padding:24px; }
+
+  .grid-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px; }
+  .card { border:1px solid var(--line); background:var(--panel); border-radius:10px; padding:20px; }
+  .stat-value { font-size:24px; font-weight:600; }
+
+  .badge { display:inline-block; border-radius:999px; padding:2px 10px; font-size:12px; font-weight:500; text-transform:capitalize; }
+  .b-open, .b-active, .b-shortlisted, .b-hired { background:rgba(43,108,163,0.1); color:var(--accentDark); }
+  .b-applied, .b-closed { background:var(--line); color:var(--muted); }
+  .b-pending, .b-rejected { background:rgba(180,85,47,0.1); color:var(--warn); }
+
+  .job-grid { display:grid; grid-template-columns:1fr; gap:16px; margin-top:24px; }
+  @media (min-width:700px) { .job-grid { grid-template-columns:1fr 1fr; } }
+  .skill { background:var(--canvas); border-radius:6px; padding:4px 8px; font-size:12px; }
+  .skills { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+
+  table { width:100%; border-collapse:collapse; font-size:14px; text-align:left; }
+  thead { background:var(--canvas); color:var(--muted); border-bottom:1px solid var(--line); }
+  th, td { padding:12px 16px; font-weight:500; }
+  tbody tr { border-bottom:1px solid var(--line); }
+  tbody tr:last-child { border-bottom:none; }
+  .table-wrap { border:1px solid var(--line); background:var(--panel); border-radius:10px; overflow:hidden; margin-top:24px; }
+
+  .search-input { margin-top:16px; width:100%; max-width:420px; border:1px solid var(--line); background:var(--panel); border-radius:6px; padding:8px 12px; font-size:14px; }
+  .form-stack { max-width:460px; margin-top:24px; }
+  .form-stack > div { margin-bottom:16px; }
+
+  .logo-svg { flex-shrink:0; }
+  .logo-word { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const state = {
+  screen: "login",
+  name: "",
+  role: "seeker",
+  section: "dashboard",
+  jobs: [
+    { id:"job_1", title:"Frontend Developer", company:"Acme Corp", location:"Bengaluru, IN", type:"Full-time", salary:"₹8–12 LPA", skills:["React","Tailwind","JavaScript"], status:"open" },
+    { id:"job_2", title:"Backend Engineer (Node.js)", company:"Globex Inc", location:"Remote", type:"Full-time", salary:"₹10–15 LPA", skills:["Node.js","MongoDB","Express"], status:"open" },
+    { id:"job_3", title:"UI/UX Design Intern", company:"Acme Corp", location:"Bengaluru, IN", type:"Internship", salary:"₹25,000/mo", skills:["Figma","Prototyping"], status:"closed" },
+  ],
+  applications: [
+    { id:"app_1", jobId:"job_1", seekerName:"Priya Sharma", status:"shortlisted", appliedOn:"2026-08-20" },
+    { id:"app_2", jobId:"job_1", seekerName:"Rahul Verma", status:"applied", appliedOn:"2026-08-22" },
+    { id:"app_3", jobId:"job_2", seekerName:"Priya Sharma", status:"rejected", appliedOn:"2026-08-18" },
+  ],
+  users: [
+    { id:"usr_1", name:"Priya Sharma", email:"priya@example.com", role:"seeker", status:"active" },
+    { id:"usr_2", name:"Rahul Verma", email:"rahul@example.com", role:"seeker", status:"active" },
+    { id:"rec_1", name:"Acme Corp HR", email:"hr@acme.com", role:"recruiter", status:"pending" },
+    { id:"rec_2", name:"Globex Inc HR", email:"hr@globex.com", role:"recruiter", status:"active" },
+  ],
+  applied: [],
+  searchQuery: "",
+};
+
+const NAV = {
+  seeker: [["dashboard","Dashboard"],["search","Search Jobs"],["applications","My Applications"]],
+  recruiter: [["dashboard","Dashboard"],["post","Post a Job"],["applicants","Applicants"]],
+  admin: [["dashboard","Dashboard"],["users","Manage Users"],["jobs","Manage Jobs"]],
+};
+
+const NEXT_STATUS = { applied: "shortlisted", shortlisted: "hired" };
+
+function logo(light) {
+  const mark = light ? "#FFFFFF" : "#2B6CA3";
+  const textColor = light ? "#FFFFFF" : "#1E2A32";
+  return `<div class="row gap-sm">
+    <svg class="logo-svg" width="26" height="18" viewBox="0 0 26 18" fill="none">
+      <circle cx="4" cy="14" r="3" fill="${mark}" />
+      <circle cx="22" cy="14" r="3" fill="${mark}" />
+      <path d="M4 14 C4 3, 22 3, 22 14" stroke="${mark}" stroke-width="2" fill="none" />
+    </svg>
+    <span class="logo-word" style="color:${textColor}">WorkBridge</span>
+  </div>`;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = state.screen === "login" ? renderLogin() : renderApp();
+  attachHandlers();
+}
+
+function renderLogin() {
+  return `
+  <div class="login-grid">
+    <div class="brand-panel">
+      ${logo(true)}
+      <div>
+        <p class="brand-tag">One structure, three roles, everyone on the same span.</p>
+        <p class="brand-sub">Seekers find roles, recruiters hire, admins keep the platform steady — all in one place.</p>
+      </div>
+      <svg style="position:absolute; bottom:-40px; right:-40px; opacity:0.2;" width="280" height="180" viewBox="0 0 280 180" fill="none">
+        <circle cx="30" cy="150" r="10" fill="#FFFFFF" />
+        <circle cx="250" cy="150" r="10" fill="#FFFFFF" />
+        <path d="M30 150 C30 20, 250 20, 250 150" stroke="#FFFFFF" stroke-width="3" />
+      </svg>
+    </div>
+    <div class="form-panel">
+      <div class="form-box">
+        <h1>Sign in</h1>
+        <p class="small muted mt-1">Preview mode — pick a name and role to explore.</p>
+        <label class="field-label">Name</label>
+        <input id="nameInput" placeholder="Your name" class="field" />
+        <label class="field-label">I am a</label>
+        <select id="roleInput" class="field">
+          <option value="seeker">Job Seeker</option>
+          <option value="recruiter">Recruiter</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button id="loginBtn" class="btn btn-primary mt-6">Continue</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderApp() {
+  const navLinks = NAV[state.role].map(([key,label]) => `
+    <li><button data-section="${key}" class="navlink ${state.section===key ? 'active' : ''}">${label}</button></li>
+  `).join("");
+
+  return `
+  <div class="header"><div class="header-inner row between">
+    ${logo(false)}
+    <div class="row gap-md small">
+      <span class="muted">${state.name || "Guest"} · <span style="text-transform:capitalize">${state.role}</span></span>
+      <button id="logoutBtn" class="btn">Log out</button>
+    </div>
+  </div></div>
+  <div class="shell">
+    <nav class="sidebar"><ul>${navLinks}</ul></nav>
+    <main class="content">${renderSection()}</main>
+  </div>`;
+}
+
+function renderSection() {
+  if (state.role === "seeker") {
+    if (state.section === "dashboard") return seekerDashboard();
+    if (state.section === "search") return seekerSearch();
+    if (state.section === "applications") return seekerApplications();
+  }
+  if (state.role === "recruiter") {
+    if (state.section === "dashboard") return recruiterDashboard();
+    if (state.section === "post") return recruiterPost();
+    if (state.section === "applicants") return recruiterApplicants();
+  }
+  if (state.role === "admin") {
+    if (state.section === "dashboard") return adminDashboard();
+    if (state.section === "users") return adminUsers();
+    if (state.section === "jobs") return adminJobs();
+  }
+  return "";
+}
+
+function statCard(value, label) {
+  return `<div class="card"><p class="stat-value">${value}</p><p class="small muted mt-1">${label}</p></div>`;
+}
+
+function seekerDashboard() {
+  const myApps = state.applications.filter(a => a.seekerName === state.name);
+  const open = state.jobs.filter(j => j.status === "open").length;
+  return `
+  <h1>Welcome back${state.name ? ", " + state.name : ""}</h1>
+  <p class="small muted mt-1">Here's what's happening with your job search.</p>
+  <div class="grid-stats mt-6">
+    ${statCard(open, "Open Jobs")}
+    ${statCard(myApps.length, "Applications Sent")}
+    ${statCard(myApps.filter(a=>a.status==="shortlisted").length, "Shortlisted")}
+  </div>`;
+}
+
+function jobCard(job, actionHtml) {
+  const skills = job.skills.map(s => `<span class="skill">${s}</span>`).join("");
+  return `<div class="card">
+    <div class="row between" style="align-items:flex-start">
+      <div><h3 style="font-size:16px; font-weight:600;">${job.title}</h3><p class="small muted mt-1">${job.company} · ${job.location}</p></div>
+      <span class="badge b-${job.status}">${job.status}</span>
+    </div>
+    <div class="skills">${skills}</div>
+    <div class="row between mt-4">
+      <span class="small muted">${job.type} · ${job.salary}</span>
+      ${actionHtml}
+    </div>
+  </div>`;
+}
+
+function seekerSearch() {
+  const q = state.searchQuery.toLowerCase();
+  const results = state.jobs.filter(j => j.status === "open" && (!q || j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.skills.some(s=>s.toLowerCase().includes(q))));
+  const cards = results.map(j => {
+    const applied = state.applied.includes(j.id);
+    const action = applied
+      ? `<span class="small" style="font-weight:500; color:var(--accentDark);">Applied</span>`
+      : `<button data-apply="${j.id}" class="btn btn-primary" style="width:auto;">Apply</button>`;
+    return jobCard(j, action);
+  }).join("") || `<p class="small muted">No jobs match that search.</p>`;
+  return `
+  <h1>Search Jobs</h1>
+  <input id="searchInput" value="${state.searchQuery}" placeholder="Search by title, company, or skill..." class="search-input" />
+  <div class="job-grid">${cards}</div>`;
+}
+
+function seekerApplications() {
+  const myApps = state.applications.filter(a => a.seekerName === state.name);
+  const rows = myApps.map(a => {
+    const job = state.jobs.find(j => j.id === a.jobId);
+    return `<tr><td>${job?.title ?? "—"}</td><td class="muted">${a.appliedOn}</td><td><span class="badge b-${a.status}">${a.status}</span></td></tr>`;
+  }).join("") || `<tr><td colspan="3" style="text-align:center; padding:24px;" class="muted">You haven't applied to anything yet.</td></tr>`;
+  return `<h1>My Applications</h1>
+  <div class="table-wrap"><table>
+  <thead><tr><th>Job</th><th>Applied On</th><th>Status</th></tr></thead>
+  <tbody>${rows}</tbody></table></div>`;
+}
+
+function recruiterDashboard() {
+  return `<h1>Welcome back${state.name ? ", " + state.name : ""}</h1>
+  <p class="small muted mt-1">A quick look at your hiring activity.</p>
+  <div class="grid-stats mt-6">
+    ${statCard(state.jobs.length, "Jobs Posted")}
+    ${statCard(state.jobs.filter(j=>j.status==="open").length, "Open Jobs")}
+    ${statCard(state.applications.length, "Total Applicants")}
+  </div>`;
+}
+
+function recruiterPost() {
+  return `<h1>Post a Job</h1>
+  <form id="postForm" class="form-stack">
+    <div><label class="field-label">Job Title</label><input required class="field" /></div>
+    <div><label class="field-label">Location</label><input required class="field" /></div>
+    <div><label class="field-label">Skills (comma separated)</label><input placeholder="React, Node.js, SQL" class="field" /></div>
+    <button type="submit" class="btn btn-primary" style="width:auto;">Post Job</button>
+    <p id="postMsg" class="small mt-3" style="display:none; color:var(--accentDark);">Saved locally for now — connect this form to your API to persist it.</p>
+  </form>`;
+}
+
+function recruiterApplicants() {
+  const rows = state.applications.map(a => {
+    const job = state.jobs.find(j => j.id === a.jobId);
+    const canAdvance = Boolean(NEXT_STATUS[a.status]);
+    const isFinal = a.status === "hired" || a.status === "rejected";
+    const actions = isFinal ? "" : `<div class="row gap-sm">
+      ${canAdvance ? `<button data-advance="${a.id}" class="btn btn-sm">Advance</button>` : ""}
+      <button data-reject="${a.id}" class="btn btn-sm btn-warn">Reject</button>
+    </div>`;
+    return `<tr><td>${a.seekerName}</td><td class="muted">${job?.title ?? "—"}</td><td><span class="badge b-${a.status}">${a.status}</span></td><td>${actions}</td></tr>`;
+  }).join("");
+  return `<h1>Applicants</h1>
+  <div class="table-wrap"><table>
+  <thead><tr><th>Candidate</th><th>Job</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>${rows}</tbody></table></div>`;
+}
+
+function adminDashboard() {
+  return `<h1>Admin Overview</h1>
+  <p class="small muted mt-1">Platform-wide activity at a glance.</p>
+  <div class="grid-stats mt-6">
+    ${statCard(state.users.length, "Total Users")}
+    ${statCard(state.users.filter(u=>u.status==="pending").length, "Pending Recruiters")}
+    ${statCard(state.jobs.length, "Jobs Posted")}
+    ${statCard(state.applications.length, "Applications")}
+  </div>`;
+}
+
+function adminUsers() {
+  const rows = state.users.map(u => `<tr>
+    <td>${u.name}</td><td class="muted">${u.email}</td><td class="muted" style="text-transform:capitalize">${u.role}</td>
+    <td><span class="badge b-${u.status}">${u.status}</span></td>
+    <td><div class="row gap-sm">
+      ${u.status!=="active" ? `<button data-approve="${u.id}" class="btn btn-sm">Approve</button>` : ""}
+      ${u.status!=="suspended" ? `<button data-suspend="${u.id}" class="btn btn-sm btn-warn">Suspend</button>` : ""}
+    </div></td></tr>`).join("");
+  return `<h1>Manage Users</h1>
+  <div class="table-wrap"><table>
+  <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>${rows}</tbody></table></div>`;
+}
+
+function adminJobs() {
+  const rows = state.jobs.map(j => `<tr>
+    <td>${j.title}</td><td class="muted">${j.company}</td>
+    <td><span class="badge b-${j.status}">${j.status}</span></td>
+    <td><button data-toggle="${j.id}" class="btn btn-sm">${j.status==="open"?"Close listing":"Reopen listing"}</button></td>
+  </tr>`).join("");
+  return `<h1>Manage Jobs</h1>
+  <div class="table-wrap"><table>
+  <thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>${rows}</tbody></table></div>`;
+}
+
+function attachHandlers() {
+  const loginBtn = document.getElementById("loginBtn");
+  if (loginBtn) loginBtn.onclick = () => {
+    const name = document.getElementById("nameInput").value.trim();
+    const role = document.getElementById("roleInput").value;
+    if (!name) return;
+    state.name = name; state.role = role; state.section = "dashboard"; state.screen = "app";
+    render();
+  };
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) logoutBtn.onclick = () => { state.screen = "login"; render(); };
+
+  document.querySelectorAll(".navlink").forEach(btn => {
+    btn.onclick = () => { state.section = btn.dataset.section; render(); };
+  });
+
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) searchInput.oninput = (e) => {
+    const pos = e.target.selectionStart;
+    state.searchQuery = e.target.value;
+    render();
+    const el = document.getElementById("searchInput");
+    if (el) { el.focus(); el.setSelectionRange(pos, pos); }
+  };
+
+  document.querySelectorAll("[data-apply]").forEach(btn => {
+    btn.onclick = () => { state.applied.push(btn.dataset.apply); render(); };
+  });
+
+  const postForm = document.getElementById("postForm");
+  if (postForm) postForm.onsubmit = (e) => {
+    e.preventDefault();
+    document.getElementById("postMsg").style.display = "block";
+  };
+
+  document.querySelectorAll("[data-advance]").forEach(btn => {
+    btn.onclick = () => {
+      const a = state.applications.find(x => x.id === btn.dataset.advance);
+      if (a && NEXT_STATUS[a.status]) a.status = NEXT_STATUS[a.status];
+      render();
+    };
+  });
+  document.querySelectorAll("[data-reject]").forEach(btn => {
+    btn.onclick = () => {
+      const a = state.applications.find(x => x.id === btn.dataset.reject);
+      if (a) a.status = "rejected";
+      render();
+    };
+  });
+  document.querySelectorAll("[data-approve]").forEach(btn => {
+    btn.onclick = () => {
+      const u = state.users.find(x => x.id === btn.dataset.approve);
+      if (u) u.status = "active";
+      render();
+    };
+  });
+  document.querySelectorAll("[data-suspend]").forEach(btn => {
+    btn.onclick = () => {
+      const u = state.users.find(x => x.id === btn.dataset.suspend);
+      if (u) u.status = "suspended";
+      render();
+    };
+  });
+  document.querySelectorAll("[data-toggle]").forEach(btn => {
+    btn.onclick = () => {
+      const j = state.jobs.find(x => x.id === btn.dataset.toggle);
+      if (j) j.status = j.status === "open" ? "closed" : "open";
+      render();
+    };
+  });
+}
+
+render();
+</script>
+</body>
+</html>
