@@ -1,2 +1,6 @@
 # Workbridge
-Post jobs, apply fast, hire smarter.
+
+A job portal project.
+
+Requirements and technology choices will be defined as the project develops.
+
