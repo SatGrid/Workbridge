@@ -6,8 +6,8 @@ export const jobSchema = z
     workplace: z.enum(['Remote', 'Hybrid', 'On-site']),
     type: z.enum(['Full-time', 'Part-time', 'Contract', 'Internship']),
     category: z.enum(['Engineering', 'Design', 'Product', 'Marketing', 'Operations']),
-    salary_min: z.coerce.number().int().min(0).max(1000000),
-    salary_max: z.coerce.number().int().min(0).max(1000000),
+    salary_min: z.coerce.number().int().min(0).max(10000000),
+    salary_max: z.coerce.number().int().min(0).max(10000000),
     description: z.string().trim().min(30).max(8000),
     requirements: z.string().trim().min(10).max(5000),
   })

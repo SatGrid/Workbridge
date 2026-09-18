@@ -60,7 +60,7 @@ test('shared workflow and database authorization', async (t) => {
   const company = (
     await db.query<{ id: string }>(`select id from companies where owner_id=$1`, [ids.recruiter])
   ).rows[0].id;
-  const insertJob = `insert into jobs(company_id,title,location,workplace,type,category,salary_min,salary_max,description,requirements) values($1,'Frontend Engineer','Worldwide','Remote','Full-time','Engineering',80000,120000,'Build thoughtful, accessible experiences with our team.','Experience with React and TypeScript.') returning id`;
+  const insertJob = `insert into jobs(company_id,title,location,workplace,type,category,salary_min,salary_max,description,requirements) values($1,'Frontend Engineer','Bengaluru, India','Remote','Full-time','Engineering',1200000,2200000,'Build thoughtful, accessible experiences with our team.','Experience with React and TypeScript.') returning id`;
   await t.test('unapproved recruiter cannot publish', async () => {
     await assert.rejects(() => as(ids.recruiter, insertJob, [company]), /row-level security/);
   });

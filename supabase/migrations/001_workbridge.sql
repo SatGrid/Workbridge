@@ -19,7 +19,7 @@ create table public.jobs (
  workplace text not null check(workplace in ('Remote','Hybrid','On-site')),
  type text not null check(type in ('Full-time','Part-time','Contract','Internship')),
  category text not null check(category in ('Engineering','Design','Product','Marketing','Operations')),
- salary_min integer not null check(salary_min>=0), salary_max integer not null check(salary_max>=salary_min and salary_max<=1000000),
+ salary_min integer not null check(salary_min>=0), salary_max integer not null check(salary_max>=salary_min and salary_max<=10000000),
  description text not null check(char_length(description) between 30 and 8000), requirements text not null check(char_length(requirements) between 10 and 5000),
  status text not null default 'published' check(status in ('published','closed')), created_at timestamptz not null default now()
 );
@@ -111,6 +111,7 @@ insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) v
 create policy resume_read on storage.objects for select to authenticated using(bucket_id='resumes' and public.active_role() is not null and exists(select 1 from public.profiles p where p.resume_path=name and public.can_read_profile(p.id)));
 create policy resume_upload on storage.objects for insert to authenticated with check(bucket_id='resumes' and (storage.foldername(name))[1]=auth.uid()::text and public.active_role()='applicant');
 create policy resume_remove on storage.objects for delete to authenticated using(bucket_id='resumes' and (storage.foldername(name))[1]=auth.uid()::text and public.active_role()='applicant');
+
 
 
 

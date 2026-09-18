@@ -6,12 +6,12 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: { default: 'Workbridge — Find your next chapter', template: '%s | Workbridge' },
   description:
-    'Discover thoughtful teams, apply for meaningful work, and manage your next move with Workbridge.',
+    'Discover thoughtful teams across India, apply for meaningful work, and manage your next move with Workbridge.',
   icons: { icon: '/favicon.svg' },
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en-IN" data-scroll-behavior="smooth">
       <body>
         <a href="#main" className="skip-link">
           Skip to content

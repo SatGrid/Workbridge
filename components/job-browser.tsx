@@ -47,7 +47,7 @@ export function JobBrowser({ jobs, sample }: { jobs: Job[]; sample: boolean }) {
             looks <span>good on you.</span>
           </h1>
           <p>
-            Find work that feels like you. Discover roles
+            Find work that feels like you. Discover roles across India
             <br className="desktop-break" /> at teams where you can make a difference.
           </p>
         </div>

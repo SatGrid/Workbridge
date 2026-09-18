@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { jobSchema, companySchema } from '../lib/validation.ts';
 const job = {
   title: 'Frontend Engineer',
-  location: 'Worldwide',
+  location: 'Bengaluru, India',
   workplace: 'Remote',
   type: 'Full-time',
   category: 'Engineering',
-  salary_min: 80000,
-  salary_max: 120000,
+  salary_min: 1200000,
+  salary_max: 2200000,
   description: 'Build thoughtful and accessible web applications with our team.',
   requirements: 'Experience building React applications.',
 };

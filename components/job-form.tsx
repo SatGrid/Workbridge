@@ -18,7 +18,7 @@ export function JobForm({ job }: { job?: Job }) {
           label="Location"
           name="location"
           defaultValue={job?.location}
-          placeholder="e.g. New York, US or Worldwide"
+          placeholder="e.g. Bengaluru, India or Remote, India"
           required
           maxLength={100}
         />
@@ -47,7 +47,7 @@ export function JobForm({ job }: { job?: Job }) {
           </select>
         </label>
         <Field
-          label="Minimum annual salary (USD)"
+          label="Minimum annual salary (INR)"
           name="salary_min"
           type="number"
           min={0}
@@ -55,7 +55,7 @@ export function JobForm({ job }: { job?: Job }) {
           required
         />
         <Field
-          label="Maximum annual salary (USD)"
+          label="Maximum annual salary (INR)"
           name="salary_max"
           type="number"
           min={0}

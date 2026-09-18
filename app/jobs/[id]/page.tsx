@@ -75,7 +75,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
         </article>
         <aside className="detail-aside">
           <section className="panel">
-            <span className="small-label">Annual salary · USD</span>
+            <span className="small-label">Annual salary · INR</span>
             <p className="salary">
               {money(job.salary_min)} – {money(job.salary_max)}
             </p>

@@ -65,13 +65,13 @@ Recruiters can edit or close their own jobs. Admins can edit, close, or delete a
 
 - `profiles`: one per Auth user. Public metadata cannot grant an admin role.
 - `companies`: one company per recruiter.
-- `jobs`: belongs to a company, with annual USD salary range and published/closed status.
+- `jobs`: belongs to a company, with annual INR salary range and published/closed status.
 - `applications`: unique per applicant/job, with a shared review status.
 - `resumes`: private PDF bucket. Applicant owner, associated job recruiter, and admin access only; download links expire after 60 seconds.
 
 Server actions validate input and verify the session. PostgreSQL row-level security and column grants enforce ownership and prevent role/status escalation even through direct API calls. Account role and approval edits go through a restricted admin function. Personal profile data is never part of the public job listing.
 
-Resume downloads use the applicant's current resume. Replacing a resume updates what recruiters can download for existing applications. Currency is USD for this first version. Messaging, payments, scheduling, and AI matching are outside scope.
+Resume downloads use the applicant's current resume. Replacing a resume updates what recruiters can download for existing applications. Salaries are stored as annual INR amounts and displayed in lakhs (for example, ₹12L / year). Sample opportunities are fictional India-based roles, not live vacancies or salary benchmarks. Messaging, payments, scheduling, and AI matching are outside scope.
 
 ## Checks
 
