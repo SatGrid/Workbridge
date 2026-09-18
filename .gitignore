@@ -9,4 +9,11 @@ Thumbs.db
 
 # Local logs
 *.log
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.vercel/
+playwright-report/
+test-results/
 
