@@ -39,7 +39,7 @@ export async function authenticate(_: ActionState, form: FormData): Promise<Acti
       const fullName = String(form.get('full_name') ?? '').trim();
       if (fullName.length < 2 || fullName.length > 80)
         return { error: 'Enter your name (2–80 characters).' };
-      const { error } = await client.auth.signUp({
+      const { data, error } = await client.auth.signUp({
         ...credentials.data,
         options: {
           data: {
@@ -49,25 +49,35 @@ export async function authenticate(_: ActionState, form: FormData): Promise<Acti
         },
       });
       if (error) return { error: error.message };
-      return {
-        success: 'Account created. Check your email to confirm your account, then sign in.',
-      };
+      if (!data.session)
+        return {
+          success: 'Account created. Check your email to confirm your account, then sign in.',
+        };
+      const { data: profile, error: profileError } = await client
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user!.id)
+        .single();
+      if (profileError || !profile)
+        return { error: 'Your profile could not be loaded. Check the database setup.' };
+      destination = home(profile.role);
+    } else {
+      const { data, error } = await client.auth.signInWithPassword(credentials.data);
+      if (error)
+        return { error: 'Email or password is incorrect, or your email has not been confirmed.' };
+      const { data: profile, error: profileError } = await client
+        .from('profiles')
+        .select('role,is_active')
+        .eq('id', data.user.id)
+        .single();
+      if (profileError || !profile)
+        return { error: 'Your profile could not be loaded. Check the database setup.' };
+      if (!profile.is_active) {
+        await client.auth.signOut();
+        return { error: 'Your account is suspended. Contact the administrator.' };
+      }
+      destination = home(profile.role);
     }
-    const { data, error } = await client.auth.signInWithPassword(credentials.data);
-    if (error)
-      return { error: 'Email or password is incorrect, or your email has not been confirmed.' };
-    const { data: profile, error: profileError } = await client
-      .from('profiles')
-      .select('role,is_active')
-      .eq('id', data.user.id)
-      .single();
-    if (profileError || !profile)
-      return { error: 'Your profile could not be loaded. Check the database setup.' };
-    if (!profile.is_active) {
-      await client.auth.signOut();
-      return { error: 'Your account is suspended. Contact the administrator.' };
-    }
-    destination = home(profile.role);
   } catch (error) {
     return fail(error);
   }
