@@ -51,6 +51,9 @@ create function public.visible_job(target uuid) returns boolean language sql sta
  select exists(select 1 from public.jobs j join public.companies c on c.id=j.company_id join public.profiles p on p.id=c.owner_id
  where j.id=target and j.status='published' and p.approved and p.is_active);
 $$;
+create function public.has_applied(target uuid) returns boolean language sql stable security definer set search_path = '' as $$
+ select exists(select 1 from public.applications where job_id=target and applicant_id=auth.uid());
+$$;
 create function public.can_read_profile(target uuid) returns boolean language sql stable security definer set search_path = '' as $$
  select target=auth.uid() or public.active_role()='admin' or (public.active_role()='recruiter' and exists(
  select 1 from public.applications a join public.jobs j on j.id=a.job_id join public.companies c on c.id=j.company_id where a.applicant_id=target and c.owner_id=auth.uid()));
@@ -73,7 +76,7 @@ create policy profile_edit on public.profiles for update to authenticated using 
 create policy company_read on public.companies for select to anon,authenticated using(true);
 create policy company_create on public.companies for insert to authenticated with check(owner_id=auth.uid() and public.active_role()='recruiter');
 create policy company_edit on public.companies for update to authenticated using(owner_id=auth.uid() and public.active_role()='recruiter') with check(owner_id=auth.uid());
-create policy job_read on public.jobs for select to anon,authenticated using(public.visible_job(id) or public.owns_company(company_id) or public.active_role()='admin' or exists(select 1 from public.applications a where a.job_id=jobs.id and a.applicant_id=auth.uid()));
+create policy job_read on public.jobs for select to anon,authenticated using(public.visible_job(id) or public.owns_company(company_id) or public.active_role()='admin' or public.has_applied(id));
 create policy job_create on public.jobs for insert to authenticated with check(public.is_approved_recruiter() and exists(select 1 from public.companies c where c.id=company_id and c.owner_id=auth.uid()));
 create policy job_edit on public.jobs for update to authenticated using((public.owns_job(id) and public.is_approved_recruiter()) or public.active_role()='admin') with check((public.owns_job(id) and public.is_approved_recruiter()) or public.active_role()='admin');
 create policy job_delete on public.jobs for delete to authenticated using(public.active_role()='admin');
