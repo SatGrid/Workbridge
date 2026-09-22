@@ -2,6 +2,14 @@
 
 A compact full-stack job portal with applicant, recruiter, and admin workspaces. Built with Next.js App Router, TypeScript, Tailwind CSS, Radix-based UI components, and Supabase (PostgreSQL, Auth, private Storage).
 
+**Live site:** [workbridge-khaki.vercel.app](https://workbridge-khaki.vercel.app/)
+
+## Screenshots
+
+| Job browser | Job details | Sign in |
+| --- | --- | --- |
+| ![Workbridge homepage showing the job browser](docs/screenshots/home.png) | ![Frontend Developer job details](docs/screenshots/job-detail.png) | ![Workbridge sign-in page](docs/screenshots/sign-in.png) |
+
 ## Start locally
 
 Requires Node.js 24+ and npm.
@@ -16,7 +24,7 @@ Open http://127.0.0.1:3000. Without Supabase credentials, the public job browser
 
 ## Connect a new Supabase project
 
-1. Create a project at https://supabase.com/dashboard. In **SQL Editor**, run the complete contents of `supabase/migrations/001_workbridge.sql` once. It creates the tables, permissions, signup trigger, and private resumes bucket.
+1. Create a project at https://supabase.com/dashboard. In **SQL Editor**, run `supabase/migrations/001_workbridge.sql` and then `supabase/migrations/002_fix_public_job_access.sql`. They create the tables, permissions, signup trigger, private resumes bucket, and public job access policy.
 2. From the project's **Connect** dialog, copy the Project URL and publishable key into `.env.local`:
 
 ```dotenv
@@ -85,4 +93,4 @@ Tests execute the actual migration in embedded PostgreSQL (PGlite), with Supabas
 
 ## Deploy
 
-Import this GitHub repository into a Next.js-compatible host such as Vercel. Set the two public Supabase environment variables, deploy, then update the Supabase Site URL and confirmation settings. Use HTTPS. No deployment or live database is provisioned by this repository alone.
+The live demo is hosted on [Vercel](https://workbridge-khaki.vercel.app/). For another deployment, import this GitHub repository into a Next.js-compatible host, set the two public Supabase environment variables, then update the Supabase Site URL and confirmation settings for the new HTTPS origin.
